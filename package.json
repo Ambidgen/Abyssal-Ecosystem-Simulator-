@@ -1,0 +1,23 @@
+{
+  "name": "abyssal-ecosystem-simulator",
+  "version": "1.0.0",
+  "description": "A 2D side-view Rain World-inspired marine ecosystem simulator: procedural behaviour trees, segmented verlet hardbodies, 4 depth zones, emergent food web.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 8080 --bind 0.0.0.0",
+    "serve": "python3 -m http.server 8080 --bind 0.0.0.0",
+    "test": "node test/headless.js",
+    "test:long": "node test/headless.js 7200 1337",
+    "test:render": "node test/renderSmoke.mjs 120"
+  },
+  "keywords": [
+    "ecosystem",
+    "simulation",
+    "behaviour-tree",
+    "verlet",
+    "rain-world",
+    "canvas"
+  ],
+  "license": "MIT"
+}
