@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Abyssal Ecosystem Simulator — a living 4-zone ocean</title>
+<meta name="description" content="A procedural marine ecosystem: 13 species with per-animal behaviour trees, segmented hardbodies, a real food web and a pressure-gradient water column." />
+<link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="ui"></div>
+
+<div id="loading">
+  <div class="box">
+    <div class="title">ABYSSAL ECOSYSTEM SIMULATOR</div>
+    <div class="what">growing the reef, cutting the caves, teaching 200 animals to want things…</div>
+    <div class="hint">
+      Every animal gets its own procedurally generated behaviour tree, a hunger bar that
+      rewrites its priorities, a hardbody of independently moving segments and limbs, and a
+      depth band it is not adapted to leave. Four zones, one food web, one leviathan holding
+      the line at the top of the abyss.
+    </div>
+  </div>
+</div>
+
+<noscript><p style="color:#cfe;font:14px monospace;padding:2rem">This simulation is entirely local and needs JavaScript.</p></noscript>
+<script type="module">
+  import { boot } from './src/main.js';
+  boot();
+</script>
+</body>
+</html>
