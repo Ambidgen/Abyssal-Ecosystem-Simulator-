@@ -446,7 +446,8 @@ export function navigate(c, tx, ty, world, speedMul = 1, opts = {}) {
   // stuck detection -> commit to a detour (this is what makes them round rocks)
   const moved = Math.hypot(b.pts[0].x - (c._px ?? b.pts[0].x), b.pts[0].y - (c._py ?? b.pts[0].y));
   if (moved < 0.35 && c.lod === 0) c.stuckT += 0.05; else c.stuckT = Math.max(0, c.stuckT - 0.02);
-  if (c.stuckT > 0.7) { c.detour = (c.rand ? c.rand.r(-1, 1) : Math.random() * 2 - 1) * 1.3; c.detourT = 1.6; c.stuckT = 0; }
+  const stuckThreshold = c.sp.yCeil !== undefined ? 0.5 : 0.7;
+  if (c.stuckT > stuckThreshold) { c.detour = (c.rand ? c.rand.r(-1, 1) : Math.random() * 2 - 1) * 1.3; c.detourT = 1.6; c.stuckT = 0; }
   if (c.detourT > 0) { c.detourT -= 0.016; if (c.detourT <= 0) c.detour = 0; }
   c._px = b.pts[0].x; c._py = b.pts[0].y;
   return dd;
@@ -962,7 +963,9 @@ A('LureDisplay', (c) => {
 A('GrazeSurface', (c, n) => feedFlora(c, n, 1), { r: { min: 120, max: 600 }, patience: { min: 4, max: 12 } });
 A('PeckKelp', (c, n) => feedFlora(c, n, 0.9, 'kelp'));
 A('BiteCoral', (c, n) => feedFlora(c, n, 0.8, 'coral'));
-A('GrazekKelp', (c, n) => feedFlora(c, n, 1.25, 'kelp'));
+A('GrazekKelp', (c, n) => feedFlora(c, n, 0.85, 'kelp'));
+// canonical spelling — keep typo as alias for save compatibility
+A('GrazeKelp', (c, n) => feedFlora(c, n, 0.85, 'kelp'));
 A('TearKelp', (c, n) => feedFlora(c, n, 1.0, 'kelp'));
 A('GrazeBiofilm', (c, n) => feedFlora(c, n, 0.7, 'biofilm'));
 A('ScrapeBarnacle', (c, n) => feedFlora(c, n, 1.1, 'barnacle'));
@@ -1173,12 +1176,11 @@ A('MigrateToZone', (c, n) => {
       c.migDirT = c.t + 4;
     }
     // fly a body-length clear of the deck, not skimming it: a 100 m animal dragging
-    // its snout along a shelf cannot generate forward motion
-    const alt = clamp(Math.min(surf, WORLD_H - 80) - (140 + c.radius * 2), 60, WORLD_H - 60);
+    // its snout along a shelf cannot generate forward motion — give extra clearance
+    const alt = clamp(Math.min(surf, WORLD_H - 80) - (120 + c.radius * 3.2), 60, WORLD_H - 60);
     navigate(c, c.migX, alt, c.world, 1.2, { band: z.id, desperate: true });
-    // lethal water is a reason to hurry: it crosses the shelf at twice the speed
-    // it would bother with when it is merely hungry
-    c.wantSpeed = Math.max(c.wantSpeed, c.sp.phys.cruise * 1.9);
+    // lethal water is a reason to hurry: it crosses the shelf faster when abyssal
+    c.wantSpeed = Math.max(c.wantSpeed, c.sp.phys.cruise * 2.15);
     c.intent = 'finding-the-drop';
     return S_R;
   }

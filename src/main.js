@@ -141,7 +141,9 @@ export class App {
     if (!best) this.cam.follow = null;
   }
   regenerate(seed) {
-    this.seed = (seed !== undefined ? seed : (Math.random() * 1e9) | 0) >>> 0;
+    // clamp to u32 so HUD input can't inject NaN/negative which would break Rand
+    const raw = seed !== undefined ? seed : (Math.random() * 1e9) | 0;
+    this.seed = (Number.isFinite(raw) ? raw : 1) >>> 0 || 1;
     this.world = createWorld({ seed: this.seed });
     this.cam.bind(this.world);
     this.scene.world = this.world;

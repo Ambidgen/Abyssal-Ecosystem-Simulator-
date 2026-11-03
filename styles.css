@@ -72,6 +72,10 @@ html, body {
 }
 .btn:hover { background: rgba(120, 200, 230, 0.16); border-color: rgba(150, 205, 225, 0.4); }
 .btn.key { min-width: 34px; }
+.btn.paused { background: rgba(255, 107, 122, 0.22); border-color: rgba(255, 107, 122, 0.5); color: #ff9aa6; animation: pulse 1.1s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.65 } }
+#pauseOverlay { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 4; opacity: 0; transition: opacity 0.2s; font: 700 28px var(--mono); letter-spacing: 0.2em; color: rgba(207,230,239,0.92); text-shadow: 0 0 20px rgba(120,244,255,0.6); }
+#pauseOverlay.on { opacity: 1; background: rgba(2,6,12,0.28); backdrop-filter: blur(1px); }
 .seed {
   width: 92px; font: 11px var(--mono); color: var(--amber); background: rgba(0, 0, 0, 0.35);
   border: 1px solid var(--line); padding: 4px 6px;

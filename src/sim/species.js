@@ -126,6 +126,8 @@ const basePhys = {
 };
 
 // ===========================================================================
+// keep old typo working as an alias for saved worlds / old seeds
+// (creature.js registers both spellings; this just ensures new trees use the canonical name)
 export const SPECIES = {
   // -------------------------------------------------------------- Z1 reef --
   minnow: {
@@ -386,7 +388,7 @@ export const SPECIES = {
     render: { style: 'urchin', body: '#3a1f4d', spine: '#b06bff', spineTip: '#ffe57a', eye: '#150a1e' },
     bt: {
       homeZone: 2, nestR: 120,
-      feed: [['GrazekKelp', 6], ['GrazeSurface', 3], ['AnchorFeet', 2]],
+      feed: [['GrazeKelp', 4], ['GrazeSurface', 3], ['AnchorFeet', 2]],
       flee: [['BristleUp', 4], ['ClingToRock', 3], ['FleeThreat', 1]],
       hunt: null, rest: [['AnchorFeet', 3], ['Rest', 2]],
       temperament: { boldness: 0.2, nervousness: 0.25, aggression: 0.15, sociability: 0.4, curiosity: 0.1 },
@@ -479,8 +481,8 @@ export const SPECIES = {
   },
 };
 
-// ---- fixups: the grazer urchin action name + derived tables --------------
-SPECIES.urchin.bt.feed = [['GrazekKelp', 6], ['GrazeSurface', 3], ['AnchorFeet', 2]];
+// ---- fixups: keep canonical alias consistent -----------------------------
+SPECIES.urchin.bt.feed = [['GrazeKelp', 4], ['GrazeSurface', 3], ['AnchorFeet', 2]];
 delete SPECIES.minnow.eats;
 
 export const SPECIES_KEYS = Object.keys(SPECIES);

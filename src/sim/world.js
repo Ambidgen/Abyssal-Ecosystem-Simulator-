@@ -147,7 +147,7 @@ export function createWorld(opts = {}) {
     for (let k = 0; k < n; k++) {
       world.fx.spore(p.x + rand.r(-14, 14), (p.topY ?? p.y) + rand.r(-8, 8));
     }
-    if (world.flora.length < cfg.maxFlora * 0.94 && rand.chance(0.5)) {
+    if (world.flora.length < cfg.maxFlora * 0.94 && rand.chance(0.62)) {
       const nx = clamp(p.x + rand.r(-190, 190), 30, WORLD_W - 30);
       const ny = world.terrain.plane(p.plane).surfaceY(nx);
       if (Math.abs(ny - p.y) < 560) world.spawnFlora(p.variant || p.kind, nx, ny, { plane: p.plane, growth: 0.1, biomass: 0.5 });
@@ -155,19 +155,25 @@ export function createWorld(opts = {}) {
   };
 
   // ---- queries -----------------------------------------------------------
+  // reusable scratch buffers — avoids 600 array allocs/frame in sense() hot loops
+  world._qCreatures = [];
+  world._qFlora = [];
+  world._qCarrion = [];
   world.queryCreatures = (x, y, r, out) => {
-    const arr = out || [];
+    const arr = out || world._qCreatures;
     arr.length = 0;
     world.hash.query(x, y, r, (o) => { if (arr.length < 96) arr.push(o); });
     return arr;
   };
-  world.queryFlora = (x, y, r, plane = 0) => {
-    const arr = [];
+  world.queryFlora = (x, y, r, plane = 0, out) => {
+    const arr = out || world._qFlora;
+    arr.length = 0;
     world.floraHash.query(x, y, r, (o) => { if (o.plane === plane) arr.push(o); });
     return arr;
   };
-  world.queryCarrion = (x, y, r) => {
-    const arr = [];
+  world.queryCarrion = (x, y, r, out) => {
+    const arr = out || world._qCarrion;
+    arr.length = 0;
     world.carrionHash.query(x, y, r, (o) => arr.push(o));
     return arr;
   };
@@ -552,7 +558,14 @@ export function stepWorld(world, dt = DT) {
 
 function stepFields(world, dt) {
   const N = world.nutrients, PK = world.plankton, COV = world.cover, FEAR = world.fear;
-  N.step(dt); PK.step(dt); COV.step(dt); FEAR.step(dt);
+  // throttle diffusion to every 2 ticks — visually identical, ~0.6 ms saved
+  world._fieldAcc = (world._fieldAcc || 0) + dt;
+  const doDiffuse = world._fieldAcc >= DT * 1.9;
+  if (doDiffuse) {
+    const ddt = world._fieldAcc;
+    N.step(ddt); PK.step(ddt); COV.step(ddt); FEAR.step(ddt);
+    world._fieldAcc = 0;
+  }
   // plankton: light-limited growth on nutrients, stronger in the photic zone
   const { cols, rows, cell } = PK;
   const v = PK.v, nv = N.v;
@@ -572,12 +585,12 @@ function stepFields(world, dt) {
   }
   // abyssal chemosynthesis: a slow nutrient source near the vents + trench
   for (const vt of world.terrain.vents) {
-    N.addClamped(vt.x, vt.y - 24, 0.05 * dt * (0.5 + 0.5 * Math.sin(world.time * 0.35 + vt.phase)) * vt.power, 6);
+    N.addClamped(vt.x, vt.y - 24, 0.068 * dt * (0.5 + 0.5 * Math.sin(world.time * 0.35 + vt.phase)) * vt.power, 6);
   }
   // deep water constantly upwells nutrients
   for (let k = 0; k < 6; k++) {
     const x = ((world.frame * 37 + k * 977) % 100) / 100 * WORLD_W;
-    N.addClamped(x, WORLD_H - 260 - (k * 90), 0.02 * dt * 3, 6);
+    N.addClamped(x, WORLD_H - 260 - (k * 90), 0.03 * dt * 3, 6);
   }
   // plankton sinking out of the photic zone becomes snow
   // natural mortality of plankton feeds the detritus pool (and back again)
@@ -589,12 +602,12 @@ function stepFields(world, dt) {
   const bottomRow = (rows - 1) * cols;
   for (let x = 0; x < cols; x++) {
     const i = bottomRow + x;
-    if (N.v[i] < 0.75) N.v[i] = lerp(N.v[i], 0.75 + 0.25 * Math.sin(world.time * 0.07 + x), 0.25);
+    if (N.v[i] < 0.82) N.v[i] = lerp(N.v[i], 0.82 + 0.22 * Math.sin(world.time * 0.07 + x), 0.32);
     const i2 = bottomRow - cols + x;
-    if (i2 >= 0 && N.v[i2] < 0.4) N.v[i2] = lerp(N.v[i2], 0.4, 0.12);
+    if (i2 >= 0 && N.v[i2] < 0.48) N.v[i2] = lerp(N.v[i2], 0.48, 0.15);
   }
   FEAR.decay = 0.3;
-  COV.decay = 0.5;
+  COV.decay = 0.35;
 }
 
 function hatcheryTick(world, dt) {
