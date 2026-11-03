@@ -103,10 +103,10 @@ fa('FeedSymbionts', (p) => {
   p.symbiont = clamp01((p.symbiont || 0.6) + 0.05);
   // macroalgae put on tissue fast (real kelp grows tens of cm a day) and can
   // re-leaves even in the dark using stored reserves; corals are slow
-  const fast = p.kind === 'kelp' ? 0.05 : p.kind === 'mat' ? 0.035 : 0.014;
+  const fast = p.kind === 'kelp' ? 0.065 : p.kind === 'mat' ? 0.038 : 0.014;
   const nut = p.world.nutrients.at(p.x, p.y);
-  p.biomass = clamp01(p.biomass + (fast + 0.10 * light + 0.03 * nut) * (p.eaten > 0 ? 1.7 : 1));
-  if (p.eaten > 0) p.eaten = Math.max(0, p.eaten - 0.04);
+  p.biomass = clamp01(p.biomass + (fast + 0.10 * light + 0.045 * nut) * (p.eaten > 0 ? 1.7 : 1));
+  if (p.eaten > 0) p.eaten = Math.max(0, p.eaten - 0.06);
   return 2;
 });
 fa('Bleach', (p) => {
@@ -395,7 +395,7 @@ export function takeFlora(p, amount) {
   p.biomass -= avail;
   p.eaten += amount * 3;
   if (p.kind === 'coral') p.symbiont = Math.max(0, (p.symbiont || 0) - amount * 0.4);
-  p.growth = clamp01(p.growth - amount * 0.12);
+  p.growth = clamp01(p.growth - amount * 0.08);
   return avail;
 }
 

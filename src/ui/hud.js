@@ -120,6 +120,12 @@ export class Hud {
     r.appendChild(pops);
 
     // ---- help ------------------------------------------------------------
+    // pause vignette — shown when simulation is frozen, so 0.25× doesn't look like a bug
+    this.pauseOverlay = el('div', '');
+    this.pauseOverlay.id = 'pauseOverlay';
+    this.pauseOverlay.textContent = 'PAUSED — press SPACE to resume';
+    document.body.appendChild(this.pauseOverlay);
+
     r.appendChild(el('div', 'panel help',
       '<b>drag</b> pan · <b>wheel</b> zoom · <b>click</b> inspect an animal<br>' +
       '<b>space</b> pause · <b>1-4</b> speed · <b>f</b> follow · <b>r</b> new world<br>' +
@@ -139,9 +145,11 @@ export class Hud {
 
     // ---- top stats
     const alive = world.alive();
+    const fpsCol = info.fps < 30 ? 'var(--red)' : info.fps < 50 ? 'var(--amber)' : 'var(--ink)';
+    const msWarn = info.ms > 16 ? ' style="color:var(--red)"' : info.ms > 12 ? ' style="color:var(--amber)"' : '';
     this.stat.innerHTML =
-      `<span><b>${info.fps.toFixed(0)}</b> fps</span>` +
-      `<span><b>${info.ms.toFixed(1)}</b> ms/frame</span>` +
+      `<span style="color:${fpsCol}"><b>${info.fps.toFixed(0)}</b> fps</span>` +
+      `<span${msWarn}><b>${info.ms.toFixed(1)}</b> ms/frame</span>` +
       `<span>t <b>${world.time.toFixed(0)}</b>s</span>` +
       `<span>day <b>${(100 * world.phase).toFixed(0)}</b>%</span>` +
       `<span>animals <b>${alive}</b>/${world.cfg.maxCreatures}</span>` +
@@ -149,6 +157,8 @@ export class Hud {
       `<span>bits <b>${world.eggs.length + world.carrion.length}</b></span>` +
       `<span class="seedtag">seed ${world.seed}</span>`;
     this.btnPause.textContent = info.paused ? '▶' : '❚❚';
+    if (this.pauseOverlay) this.pauseOverlay.classList.toggle('on', !!info.paused);
+    this.btnPause.classList.toggle('paused', !!info.paused);
     this.btnSpeed.textContent = (info.speedMul || 1) + '×';
     this.seedBox.value = world.seed;
 

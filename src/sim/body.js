@@ -206,11 +206,12 @@ export function stepBody(c, dt, world) {
   // Tuned so that the loss of lift is stronger than a desperate stroke but far
   // short of a free-fall: ~120 px/s^2 a few hundred pixels above the line.
   if (ceiling !== undefined && c.y < ceiling) {
-    let ballast = Math.min(700, (ceiling - c.y) * 0.25);
-    // ...but it must not be sucked onto the seabed: an animal lying on rock has no
-    // water beneath it to displace, so the sink has to ease off or it grinds there
-    // forever. Losing lift near the floor is what lets it lift off and leave.
-    if (c.y > world.terrain.plane(c.plane).surfaceY(c.x) - c.radius * 2.4) ballast *= 0.28;
+    let ballast = Math.min(700, (ceiling - c.y) * 0.26);
+    // ease off when already on rock — losing lift near the floor is what lets it lift off and leave
+    // extra clearance for huge bodies so a 330 px leviathan doesn't grind on the deck
+    const groundY = world.terrain.plane(c.plane).surfaceY(c.x);
+    const nearRock = c.y > groundY - c.radius * 3.2;
+    if (nearRock) ballast *= 0.28;
     weight += ballast;
   }
   c.density = density;

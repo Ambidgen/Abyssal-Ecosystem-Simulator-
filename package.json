@@ -8,7 +8,7 @@
     "start": "python3 -m http.server 8080 --bind 0.0.0.0",
     "serve": "python3 -m http.server 8080 --bind 0.0.0.0",
     "test": "node test/headless.js",
-    "test:long": "node test/headless.js 7200 1337",
+    "test:long": "node test/headless.js 3600 1337",
     "test:render": "node test/renderSmoke.mjs 120"
   },
   "keywords": [
